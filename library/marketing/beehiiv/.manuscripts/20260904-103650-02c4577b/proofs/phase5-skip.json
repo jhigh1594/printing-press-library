@@ -4,7 +4,7 @@
   "run_id": "20260904-103650-02c4577b",
   "status": "skip",
   "level": "none",
-  "source_fingerprint": "d5e1347a44f8ed7e8e01cf0fc4f67f418f4ca9ad7e5dd9a30d64473b6ffafa99",
+  "source_fingerprint": "7963f80868f9e54b9a92385c3f9a0807e80a42914ca8e0e813f9d010a610bd54",
   "skip_reason": "auth-unavailable",
   "auth_context": {
     "type": "bearer_token",
