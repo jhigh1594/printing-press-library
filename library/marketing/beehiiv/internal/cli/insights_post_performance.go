@@ -61,7 +61,10 @@ func newNovelInsightsPostPerformanceCmd(flags *rootFlags) *cobra.Command {
 				}
 				posts = append(posts, post)
 			}
+			pubID := optionalArg(args)
+			pubs := syncedPublications(cmd.Context(), db)
 			result := map[string]any{
+				"scope_warning": publicationScopeNote(pubs, pubID),
 				"publication_id": optionalArg(args),
 				"posts": posts,
 				"note":  "stats are present when the mirror was synced with expand=stats",

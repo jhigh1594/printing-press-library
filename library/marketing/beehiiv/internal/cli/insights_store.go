@@ -184,3 +184,26 @@ func optionalArg(args []string) string {
 	}
 	return ""
 }
+
+// publicationScope returns a warning when the mirror holds multiple
+// publications but the caller did not scope to one. Beehiiv rows sync
+// without publication tags, so multi-publication mirrors mix rows.
+func publicationScopeNote(pubs []map[string]any, requested string) string {
+    if requested != "" || len(pubs) <= 1 {
+        return ""
+    }
+    return fmt.Sprintf("mirror holds %d publications; rows are not per-publication tagged - sync one publication per mirror for exact attribution", len(pubs))
+}
+
+// publicationInMirror reports whether the requested publication exists in the mirror.
+func publicationInMirror(pubs []map[string]any, requested string) bool {
+    if requested == "" {
+        return true
+    }
+    for _, p := range pubs {
+        if id, _ := p["id"].(string); id == requested {
+            return true
+        }
+    }
+    return false
+}

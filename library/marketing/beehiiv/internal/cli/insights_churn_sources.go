@@ -60,7 +60,10 @@ func newNovelInsightsChurnSourcesCmd(flags *rootFlags) *cobra.Command {
 				key := strings.Join(nonEmptyParts(s.UTMSource, s.UTMChannel, s.ReferringSite), " / ")
 				bump(combined, key)
 			}
+			pubID := optionalArg(args)
+			pubs := syncedPublications(cmd.Context(), db)
 			result := map[string]any{
+				"scope_warning": publicationScopeNote(pubs, pubID),
 				"publication_id": optionalArg(args),
 				"scanned_subscriptions": len(subs),
 				"churned":               churned,

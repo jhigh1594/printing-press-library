@@ -62,7 +62,10 @@ func newNovelInsightsSubscriberSourcesCmd(flags *rootFlags) *cobra.Command {
 					active++
 				}
 			}
+			pubID := optionalArg(args)
+			pubs := syncedPublications(ctx, db)
 			result := map[string]any{
+				"scope_warning": publicationScopeNote(pubs, pubID),
 				"publication_id": optionalArg(args),
 				"scanned_subscriptions": len(subs),
 				"net_growth":            active - churned,

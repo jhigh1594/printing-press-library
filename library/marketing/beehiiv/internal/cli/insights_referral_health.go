@@ -51,7 +51,9 @@ func newNovelInsightsReferralHealthCmd(flags *rootFlags) *cobra.Command {
 					withCodes++
 				}
 			}
+			pubID := optionalArg(args)
 			result := map[string]any{
+				"scope_warning": publicationScopeNote(pubs, pubID),
 				"publication_id": optionalArg(args),
 				"referral_program":          referral,
 				"subscribers_with_codes":    withCodes,

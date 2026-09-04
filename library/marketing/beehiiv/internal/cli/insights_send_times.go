@@ -77,7 +77,10 @@ func newNovelInsightsSendTimesCmd(flags *rootFlags) *cobra.Command {
 				}
 				return list[i].Weekday < list[j].Weekday
 			})
+			pubID := optionalArg(args)
+			pubs := syncedPublications(cmd.Context(), db)
 			result := map[string]any{
+				"scope_warning": publicationScopeNote(pubs, pubID),
 				"publication_id":          optionalArg(args),
 				"slots":                   list,
 				"posts_without_send_time": sendsWithoutDate,
