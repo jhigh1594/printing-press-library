@@ -4,20 +4,15 @@
   "run_id": "20260904-103650-02c4577b",
   "status": "pass",
   "level": "full",
-  "matrix_size": 259,
-  "tests_passed": 259,
-  "tests_skipped": 346,
-  "tests_unverified": 346,
-  "coverage_hollow": true,
-  "hollow_features": [
-    "insights churn-sources",
-    "insights subscriber-sources"
-  ],
+  "matrix_size": 263,
+  "tests_passed": 263,
+  "tests_skipped": 342,
+  "tests_unverified": 342,
   "auth_context": {
     "type": "bearer_token",
     "api_key_available": true
   },
-  "source_fingerprint": "a687ee2e89a5df1a97bff0afb2515e4064ba295f952d45d54d2973b478d3c7db",
+  "source_fingerprint": "362f510141d4c30550e1cca86f5f15da566d9eec4316aeec56d78ef4af82fcd9",
   "source_files": {
     "cmd/beehiiv-pp-cli/main.go": "c992d74b7b1f2abd4fc788ad1b22721c9a75592759c5b901e620962a3fffe020",
     "cmd/beehiiv-pp-mcp/main.go": "17086059f1880e2ceaeb046c918f61fda01aaee844f5d3235001ee0335a0bcaf",
@@ -76,7 +71,7 @@
     "internal/cli/feedback.go": "2e61ce0cff4e9376c18c82fe2ff3e1ff6db45f846ea0100f3c7246bd8e0fd135",
     "internal/cli/helpers.go": "b2ee48e5bab357b22ead3dd89d2a049eeb77cad4b436df6372708d417ee36ecb",
     "internal/cli/insights.go": "b515bd778f5bdffc05f1db91deec205c5ab3e9d9c412a6fffb665d44bb5f8ed5",
-    "internal/cli/insights_churn_sources.go": "af524022b5d99b63f070dffc25afc67d605beeaf5246be33a58524dbb54a7c2d",
+    "internal/cli/insights_churn_sources.go": "2295d7430fbb754c814da96c3215203753ba0dd1b43d80c09fe43527abf888cb",
     "internal/cli/insights_churn_sources_test.go": "ab013eb3f5762fd352359e0b219affff376cbffd999297aa5ea72aa71650996b",
     "internal/cli/insights_compare_publications.go": "f7c5c5d9406459ab128952edcaaeb3a2c151700b24cb2027c1d27bcf36655962",
     "internal/cli/insights_compare_publications_test.go": "6d17a5cd1613059a70b5288c5dd65ecb16c02fff6548bb3abea808a245d40101",
@@ -90,7 +85,7 @@
     "internal/cli/insights_store.go": "6c6212418fa5f55e4a4c217add92dd3d600378dc209eac0759f4d2dcce57aa44",
     "internal/cli/insights_subscriber_lookup.go": "d33de56ec0318d43fc56851fbbd6c1c9c4da719a052c8adc0bb64547fc06b917",
     "internal/cli/insights_subscriber_lookup_test.go": "7d01b177ab80cd1f3da70cc2a6996c01095cdec228d2d7caeb9b56a4dd3c6d00",
-    "internal/cli/insights_subscriber_sources.go": "41463e310414a9605d5b4f7ee2c552b4150d0262cb07c55ee59a6f306d4150e9",
+    "internal/cli/insights_subscriber_sources.go": "c94bfb633a423d46d40d25c38c36db2d349807760a8bc6d0abc10e255c7c02af",
     "internal/cli/insights_subscriber_sources_test.go": "465cb7467d8dd0f659b0b91288a8757a73d6dca1d0a5f9d2ea4221fd7e6bf2a1",
     "internal/cli/learn_init.go": "5a1927ab150733c952edad7330178b4f1d5607d82be467204765d7cc1564da72",
     "internal/cli/learn_init_test.go": "12d612a2e9d5b8cc733d5ad514884f2c643fdbd0c5042b60d7c301a93d3f00e1",

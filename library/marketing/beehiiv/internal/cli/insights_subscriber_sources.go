@@ -23,6 +23,8 @@ func newNovelInsightsSubscriberSourcesCmd(flags *rootFlags) *cobra.Command {
 		Long:    "Use this command for total audience acquisition by source.\nDo NOT use it for unsubscribe attribution; use 'insights churn-sources' instead.",
 		Example: "  beehiiv-pp-cli insights subscriber-sources pub_477b0b68-0ab1-4b3f-954e-d1f6302b58a7 --limit 20 --agent",
 		Annotations: map[string]string{
+			"pp:typed-exit-codes": "0,3",
+			"pp:happy-args":       "pub=pub_477b0b68-0ab1-4b3f-954e-d1f6302b58a7;--limit=20;--agent",
 			"mcp:read-only": "true",
 			"pp:data-source": "computed",
 		},
