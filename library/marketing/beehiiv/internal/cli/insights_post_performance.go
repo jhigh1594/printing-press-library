@@ -21,7 +21,7 @@ func newNovelInsightsPostPerformanceCmd(flags *rootFlags) *cobra.Command {
 		Short:   "Review recent sends with status, timing, and expanded stats in one table",
 		Long:    "Use this command for per-post detail.\nDo NOT use it for the account-level snapshot; use 'insights growth-summary' instead.",
 		Example: "  beehiiv-pp-cli insights post-performance pub_477b0b68-0ab1-4b3f-954e-d1f6302b58a7 --limit 10 --agent",
-		Annotations: map[string]string{
+		Annotations: map[string]string{ "pp:typed-exit-codes": "0,3", "pp:happy-args": "<publicationId>=pub_477b0b68-0ab1-4b3f-954e-d1f6302b58a7;--limit=10;--agent",
 			"mcp:read-only": "true",
 			"pp:data-source": "computed",
 		},
@@ -37,9 +37,14 @@ func newNovelInsightsPostPerformanceCmd(flags *rootFlags) *cobra.Command {
 				return nil
 			}
 			defer closeDB()
+			pubID := optionalArg(args)
+			if pubs := syncedPublications(cmd.Context(), db); len(pubs) > 0 && !publicationInMirror(pubs, pubID) && !beehiivPrefixedIDRE.MatchString(pubID) {
+				return notFoundErr(fmt.Errorf("invalid publication id %q", pubID))
+			}
+			pubFilter, pubArgs := publicationDataFilter(pubID)
 			rows, err := scanRows(cmd.Context(), db,
-				`SELECT id, data FROM posts ORDER BY COALESCE(json_extract(data,'$.publish_date'), json_extract(data,'$.created')) DESC LIMIT ?`,
-				flagLimit)
+				`SELECT id, data FROM posts WHERE 1=1`+pubFilter+` ORDER BY COALESCE(json_extract(data,'$.publish_date'), json_extract(data,'$.created')) DESC LIMIT ?`,
+				append(pubArgs, flagLimit)...)
 			if err != nil {
 				return usageErr(fmt.Errorf("querying posts: %w", err))
 			}
@@ -61,13 +66,13 @@ func newNovelInsightsPostPerformanceCmd(flags *rootFlags) *cobra.Command {
 				}
 				posts = append(posts, post)
 			}
-			pubID := optionalArg(args)
 			pubs := syncedPublications(cmd.Context(), db)
 			result := map[string]any{
 				"scope_warning": publicationScopeNote(pubs, pubID),
+				"note":           publicationTagNote(cmd.Context(), db, "posts", pubID, len(posts)),
 				"publication_id": optionalArg(args),
 				"posts": posts,
-				"note":  "stats are present when the mirror was synced with expand=stats",
+				"stats_note":     "stats are present when the mirror was synced with expand=stats",
 			}
 			return printJSONFiltered(cmd.OutOrStdout(), result, flags)
 		},

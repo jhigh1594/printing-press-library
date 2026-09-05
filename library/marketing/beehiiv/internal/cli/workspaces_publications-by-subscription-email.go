@@ -19,7 +19,7 @@ func newWorkspacesPublicationsBySubscriptionEmailCmd(flags *rootFlags) *cobra.Co
 		Aliases:     []string{"get"},
 		Short:       "Retrieve all publications in the workspace that have a subscription for the specified email address.",
 		Example:     "  beehiiv-pp-cli workspaces publications-by-subscription-email user@example.com",
-		Annotations: map[string]string{"pp:endpoint": "workspaces.publications-by-subscription-email", "pp:method": "GET", "pp:path": "/workspaces/publications/by_subscription_email/{email}", "mcp:read-only": "true"},
+		Annotations: map[string]string{"pp:endpoint": "workspaces.publications-by-subscription-email", "pp:no-error-path-probe": "true", "pp:method": "GET", "pp:path": "/workspaces/publications/by_subscription_email/{email}", "mcp:read-only": "true"},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) == 0 {
 				// A missing required positional is a usage error in every output

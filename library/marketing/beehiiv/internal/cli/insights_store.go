@@ -5,6 +5,7 @@
 package cli
 
 import (
+	"regexp"
 	"context"
 	"database/sql"
 	"encoding/json"
@@ -92,13 +93,14 @@ type subRow struct {
 	CreatedUnix   sql.NullInt64
 }
 
-func scanSubscriptions(ctx context.Context, db *store.Store) ([]subRow, error) {
+func scanSubscriptions(ctx context.Context, db *store.Store, pubID string) ([]subRow, error) {
+	pubFilter, pubArgs := publicationDataFilter(pubID)
 	rows, err := db.DB().QueryContext(ctx, `SELECT id,
 			COALESCE(email,''), COALESCE(status,''), COALESCE(subscription_tier,''),
 			COALESCE(referral_code,''), COALESCE(referring_site,''),
 			COALESCE(utm_source,''), COALESCE(utm_medium,''), COALESCE(utm_channel,''), COALESCE(utm_campaign,''),
 			created
-		FROM subscriptions`)
+		FROM subscriptions WHERE 1=1`+pubFilter, pubArgs...)
 	if err != nil {
 		return nil, err
 	}
@@ -207,3 +209,31 @@ func publicationInMirror(pubs []map[string]any, requested string) bool {
     }
     return false
 }
+
+// publicationDataFilter builds a WHERE fragment scoped to one publication.
+func publicationDataFilter(pubID string) (string, []any) {
+	if pubID == "" {
+		return "", nil
+	}
+	return " AND (json_extract(data,'$.publications_id') = ? OR json_extract(data,'$.parent_id') = ?)", []any{pubID, pubID}
+}
+
+// publicationTagNote explains an empty filtered result when the mirror still
+// holds untagged rows synced by an older build.
+func publicationTagNote(ctx context.Context, db *store.Store, table, pubID string, matched int) string {
+	if pubID == "" || matched > 0 {
+		return ""
+	}
+	var untagged int
+	_ = db.DB().QueryRowContext(ctx,
+		"SELECT COUNT(*) FROM "+table+" WHERE json_extract(data,'$.publications_id') IS NULL AND json_extract(data,'$.parent_id') IS NULL").Scan(&untagged)
+	if untagged == 0 {
+		return "no rows match publication " + pubID
+	}
+	return fmt.Sprintf("no rows match publication %s; %d mirror rows lack publication tags (synced by an older build) - re-run sync to tag them", pubID, untagged)
+}
+
+// beehiivPrefixedIDRE matches well-formed beehiiv prefixed IDs (pub_…, sub_…).
+// Well-formed-but-absent IDs yield a filtered empty result; malformed input
+// is a usage error.
+var beehiivPrefixedIDRE = regexp.MustCompile(`^[a-z]+_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$`)

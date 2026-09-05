@@ -39,7 +39,7 @@ func newNovelInsightsComparePublicationsCmd(flags *rootFlags) *cobra.Command {
 				b, _ := pubs[j]["name"].(string)
 				return a < b
 			})
-			subs, err := scanSubscriptions(ctx, db)
+			subs, err := scanSubscriptions(ctx, db, "") // cross-publication by design
 			if err != nil {
 				return usageErr(fmt.Errorf("querying subscriptions: %w", err))
 			}

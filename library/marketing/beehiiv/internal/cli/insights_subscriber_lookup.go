@@ -19,7 +19,7 @@ func newNovelInsightsSubscriberLookupCmd(flags *rootFlags) *cobra.Command {
 		Short:   "Find one subscriber by email or subscription ID and get a compact record",
 		Long:    "Use this command for one subscriber by email or ID.\nDo NOT use it for source-attribution counts; use 'insights subscriber-sources' instead.",
 		Example: "  beehiiv-pp-cli insights subscriber-lookup reader@example.com --agent --select subscription.email,subscription.status",
-		Annotations: map[string]string{
+		Annotations: map[string]string{ "pp:happy-args": "<email>=reader@example.com;--agent",
 			"mcp:read-only":      "true",
 			"pp:data-source":     "computed",
 			"pp:typed-exit-codes": "0,3",
@@ -57,7 +57,7 @@ func newNovelInsightsSubscriberLookupCmd(flags *rootFlags) *cobra.Command {
 					if !wantsHumanTable(cmd.OutOrStdout(), flags) {
 						_ = printJSONFiltered(cmd.OutOrStdout(), map[string]any{"found": false, "query": query}, flags)
 					}
-					return nil
+					return notFoundErr(fmt.Errorf("no subscriber matching %q", query))
 				}
 				return usageErr(fmt.Errorf("querying subscriber: %w", err))
 			}

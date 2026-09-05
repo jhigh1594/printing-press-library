@@ -26,7 +26,7 @@ func newNovelInsightsSendTimesCmd(flags *rootFlags) *cobra.Command {
 		Use:         "send-times [publicationId]",
 		Short:       "Find your best send slot: open rate by weekday and hour from your own history",
 		Example:     "  beehiiv-pp-cli insights send-times pub_477b0b68-0ab1-4b3f-954e-d1f6302b58a7 --agent",
-		Annotations: map[string]string{"mcp:read-only": "true", "pp:data-source": "computed"},
+		Annotations: map[string]string{ "pp:typed-exit-codes": "0,3", "pp:happy-args": "<publicationId>=pub_477b0b68-0ab1-4b3f-954e-d1f6302b58a7;--agent","mcp:read-only": "true", "pp:data-source": "computed"},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) == 0 && cmd.Flags().NFlag() == 0 {
 				return cmd.Help()
@@ -39,7 +39,12 @@ func newNovelInsightsSendTimesCmd(flags *rootFlags) *cobra.Command {
 				return nil
 			}
 			defer closeDB()
-			rows, err := scanRows(cmd.Context(), db, `SELECT id, data FROM posts`)
+			pubID := optionalArg(args)
+			if pubs := syncedPublications(cmd.Context(), db); len(pubs) > 0 && !publicationInMirror(pubs, pubID) && !beehiivPrefixedIDRE.MatchString(pubID) {
+				return notFoundErr(fmt.Errorf("invalid publication id %q", pubID))
+			}
+			pubFilter, pubArgs := publicationDataFilter(pubID)
+			rows, err := scanRows(cmd.Context(), db, `SELECT id, data FROM posts WHERE 1=1`+pubFilter, pubArgs...)
 			if err != nil {
 				return usageErr(fmt.Errorf("querying posts: %w", err))
 			}
@@ -77,7 +82,6 @@ func newNovelInsightsSendTimesCmd(flags *rootFlags) *cobra.Command {
 				}
 				return list[i].Weekday < list[j].Weekday
 			})
-			pubID := optionalArg(args)
 			pubs := syncedPublications(cmd.Context(), db)
 			result := map[string]any{
 				"scope_warning": publicationScopeNote(pubs, pubID),

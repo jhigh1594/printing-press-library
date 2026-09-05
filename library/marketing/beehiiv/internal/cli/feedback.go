@@ -108,6 +108,13 @@ POSTed as JSON after the local write.
 Write what surprised you or tripped you up, not a bug report. The
 loop is: agent notices friction -> one invocation -> captured -> the
 maintainer sees it.`,
+		Example: strings.Trim(`
+  # record friction locally (never sent anywhere by default)
+  beehiiv-pp-cli feedback "sync --resources list was unclear"
+
+  # review what was captured
+  beehiiv-pp-cli feedback list
+`, "\n"),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var text string
 			if useStdin {

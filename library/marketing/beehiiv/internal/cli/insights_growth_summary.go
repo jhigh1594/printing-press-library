@@ -49,7 +49,7 @@ func newNovelInsightsGrowthSummaryCmd(flags *rootFlags) *cobra.Command {
 					return notFoundErr(fmt.Errorf("publication %s not found in the local mirror; sync publications first", args[0]))
 				}
 			}
-			subs, err := scanSubscriptions(ctx, db)
+			subs, err := scanSubscriptions(ctx, db, args[0])
 			if err != nil {
 				return usageErr(fmt.Errorf("querying subscriptions: %w", err))
 			}

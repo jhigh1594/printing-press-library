@@ -38,7 +38,11 @@ func newNovelInsightsChurnSourcesCmd(flags *rootFlags) *cobra.Command {
 				return nil
 			}
 			defer closeDB()
-			subs, err := scanSubscriptions(cmd.Context(), db)
+			pubID := optionalArg(args)
+			if pubs := syncedPublications(cmd.Context(), db); len(pubs) > 0 && !publicationInMirror(pubs, pubID) && !beehiivPrefixedIDRE.MatchString(pubID) {
+				return notFoundErr(fmt.Errorf("invalid publication id %q", pubID))
+			}
+			subs, err := scanSubscriptions(cmd.Context(), db, pubID)
 			if err != nil {
 				return usageErr(fmt.Errorf("querying subscriptions: %w", err))
 			}
@@ -60,7 +64,6 @@ func newNovelInsightsChurnSourcesCmd(flags *rootFlags) *cobra.Command {
 				key := strings.Join(nonEmptyParts(s.UTMSource, s.UTMChannel, s.ReferringSite), " / ")
 				bump(combined, key)
 			}
-			pubID := optionalArg(args)
 			pubs := syncedPublications(cmd.Context(), db)
 			result := map[string]any{
 				"scope_warning": publicationScopeNote(pubs, pubID),
@@ -74,7 +77,10 @@ func newNovelInsightsChurnSourcesCmd(flags *rootFlags) *cobra.Command {
 				"combined":              topCounts(combined, flagLimit),
 			}
 			if churned == 0 {
-				result["note"] = "no unsubscribed subscribers in the local mirror"
+				result["note"] = publicationTagNote(cmd.Context(), db, "subscriptions", pubID, len(subs))
+				if result["note"] == "" {
+					result["note"] = "no unsubscribed subscribers in the local mirror"
+				}
 			}
 			return printJSONFiltered(cmd.OutOrStdout(), result, flags)
 		},

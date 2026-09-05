@@ -38,8 +38,12 @@ func newNovelInsightsSubscriberSourcesCmd(flags *rootFlags) *cobra.Command {
 				return nil
 			}
 			defer closeDB()
+			pubID := optionalArg(args)
+			if pubs := syncedPublications(cmd.Context(), db); len(pubs) > 0 && !publicationInMirror(pubs, pubID) && !beehiivPrefixedIDRE.MatchString(pubID) {
+				return notFoundErr(fmt.Errorf("invalid publication id %q", pubID))
+			}
 			ctx := cmd.Context()
-			subs, err := scanSubscriptions(ctx, db)
+			subs, err := scanSubscriptions(ctx, db, pubID)
 			if err != nil {
 				return usageErr(fmt.Errorf("querying subscriptions: %w", err))
 			}
@@ -62,7 +66,6 @@ func newNovelInsightsSubscriberSourcesCmd(flags *rootFlags) *cobra.Command {
 					active++
 				}
 			}
-			pubID := optionalArg(args)
 			pubs := syncedPublications(ctx, db)
 			result := map[string]any{
 				"scope_warning": publicationScopeNote(pubs, pubID),
@@ -77,6 +80,7 @@ func newNovelInsightsSubscriberSourcesCmd(flags *rootFlags) *cobra.Command {
 				"referring_sites":       topCounts(countNonEmpty(sites), flagLimit),
 				"combined":              topCounts(countNonEmpty(combined), flagLimit),
 				"publications":          syncedPublications(ctx, db),
+				"note":             publicationTagNote(ctx, db, "subscriptions", pubID, len(subs)),
 			}
 			return printJSONFiltered(cmd.OutOrStdout(), result, flags)
 		},

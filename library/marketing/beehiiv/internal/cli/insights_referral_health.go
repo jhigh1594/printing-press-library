@@ -17,7 +17,7 @@ func newNovelInsightsReferralHealthCmd(flags *rootFlags) *cobra.Command {
 		Use:         "referral-health [publicationId]",
 		Short:       "Check referral-program config and how many subscribers carry referral codes",
 		Example:     "  beehiiv-pp-cli insights referral-health pub_477b0b68-0ab1-4b3f-954e-d1f6302b58a7 --agent",
-		Annotations: map[string]string{"mcp:read-only": "true", "pp:data-source": "computed"},
+		Annotations: map[string]string{ "pp:typed-exit-codes": "0,3", "pp:happy-args": "<publicationId>=pub_477b0b68-0ab1-4b3f-954e-d1f6302b58a7;--agent","mcp:read-only": "true", "pp:data-source": "computed"},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) == 0 && cmd.Flags().NFlag() == 0 {
 				return cmd.Help()
@@ -30,6 +30,10 @@ func newNovelInsightsReferralHealthCmd(flags *rootFlags) *cobra.Command {
 				return nil
 			}
 			defer closeDB()
+			pubID := optionalArg(args)
+			if pubs := syncedPublications(cmd.Context(), db); len(pubs) > 0 && !publicationInMirror(pubs, pubID) && !beehiivPrefixedIDRE.MatchString(pubID) {
+				return notFoundErr(fmt.Errorf("invalid publication id %q", pubID))
+			}
 			ctx := cmd.Context()
 			pubs := syncedPublications(ctx, db)
 			referral := map[string]any{}
@@ -41,7 +45,7 @@ func newNovelInsightsReferralHealthCmd(flags *rootFlags) *cobra.Command {
 					break
 				}
 			}
-			subs, err := scanSubscriptions(ctx, db)
+			subs, err := scanSubscriptions(ctx, db, pubID)
 			if err != nil {
 				return usageErr(fmt.Errorf("querying subscriptions: %w", err))
 			}
@@ -51,7 +55,6 @@ func newNovelInsightsReferralHealthCmd(flags *rootFlags) *cobra.Command {
 					withCodes++
 				}
 			}
-			pubID := optionalArg(args)
 			result := map[string]any{
 				"scope_warning": publicationScopeNote(pubs, pubID),
 				"publication_id": optionalArg(args),
